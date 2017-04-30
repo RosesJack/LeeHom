@@ -5,6 +5,11 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.example.administrator.leehom.model.MusicModel;
+import com.example.administrator.leehom.utils.Utils;
+
+import java.util.List;
+
 
 /**
  * auther：wzy
@@ -37,4 +42,5 @@ public class FragmentBase extends Fragment {
         super.onDetach();
         Log.i(TAG, "onDetach");
     }
+
 }

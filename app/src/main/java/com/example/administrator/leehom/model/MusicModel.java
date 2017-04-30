@@ -63,7 +63,10 @@ public class MusicModel {
 
     public ContentValues toContentValue() {
         ContentValues values = new ContentValues();
-        values.put("name", this.getName());
+        String name = getUrl();
+        int index = name.lastIndexOf("/");
+        name = name.substring(index, name.length() - 1);
+        values.put("name", name);
         values.put("url", this.getUrl());
         return values;
     }

@@ -5,13 +5,17 @@ import android.view.ViewGroup;
 
 import com.example.administrator.leehom.fragment.viewholder.BaseViewHolder;
 
+import java.util.List;
+
 /**
  * auther：wzy
  * date：2017/4/30 16 :07
  * desc:
  */
 
-public class BaseAdapter extends RecyclerView.Adapter<BaseViewHolder> {
+public class BaseAdapter<T> extends RecyclerView.Adapter<BaseViewHolder> {
+    protected List<T> mData;
+
     @Override
     public BaseViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
@@ -26,5 +30,10 @@ public class BaseAdapter extends RecyclerView.Adapter<BaseViewHolder> {
     @Override
     public int getItemCount() {
         return 0;
+    }
+
+    public void updataRefresh(List<T> list) {
+        mData = list;
+        notifyDataSetChanged();
     }
 }

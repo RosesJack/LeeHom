@@ -12,6 +12,8 @@ import com.example.administrator.leehom.utils.Utils;
 
 import java.util.List;
 
+import static android.R.id.list;
+
 
 /**
  * auther：wzy
@@ -73,6 +75,55 @@ public class MusicDao implements DbDao<MusicModel> {
         return insertNum;
     }
 
+    public long insert(MusicModel musicModel) {
+        if (Utils.checkNull(musicModel) || Utils.checkNull(mMusicDbHelp)) {
+            return -1;
+        }
+        long insertNum = mMusicDbHelp.insert(MusicDbHelp.TABLE_NAME, null, musicModel.toContentValue());
+        return insertNum;
+    }
+
+    public long insert(String path) {
+        if (Utils.checkNull(path) || Utils.checkNull(mMusicDbHelp)) {
+            return -1;
+        }
+        MusicModel musicModel = new MusicModel();
+        musicModel.setUrl(path);
+        long insertNum = mMusicDbHelp.insert(MusicDbHelp.TABLE_NAME, null, musicModel.toContentValue());
+        musicModel = null;
+        return insertNum;
+    }
+
+    /**
+     * 先删除所有数据 再重新插入
+     *
+     * @param paths
+     * @return
+     */
+    public long deleteAllAndInsertNew(List<String> paths) {
+        if (Utils.checkNull(paths) || Utils.checkNull(mMusicDbHelp)) {
+            return -1;
+        }
+        long insertNum = 0;
+        SQLiteDatabase writableDatabase = mMusicDbHelp.getWritableDatabase();
+        try {
+            writableDatabase.beginTransaction();
+            // 删除所有
+            int delete = writableDatabase.delete(MusicDbHelp.TABLE_NAME, null, null);
+            if (delete > 0) {
+                // 事务批量插入
+                for (String path : paths) {
+                    ContentValues values = new ContentValues();
+                    values.put("url", path);
+                    insertNum = writableDatabase.insert(MusicDbHelp.TABLE_NAME, null, values);
+                }
+            }
+            writableDatabase.setTransactionSuccessful();
+        } finally {
+            writableDatabase.endTransaction();
+        }
+        return insertNum;
+    }
 
     @Override
     public int delete(List<MusicModel> list) {
@@ -110,5 +161,13 @@ public class MusicDao implements DbDao<MusicModel> {
     @Override
     public int update() {
         return 0;
+    }
+
+    public long deleteAll() {
+        if (Utils.checkNull(mMusicDbHelp)) {
+            return -1;
+        }
+        SQLiteDatabase writableDatabase = mMusicDbHelp.getWritableDatabase();
+        return writableDatabase.delete(MusicDbHelp.TABLE_NAME, null, null);
     }
 }

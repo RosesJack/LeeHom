@@ -21,8 +21,7 @@ import java.util.List;
  * desc:
  */
 
-public class MainFragmentAdapter extends BaseAdapter {
-    private List<MusicModel> mData;
+public class MainFragmentAdapter extends BaseAdapter<MusicModel> {
     private final static String TAG = "MainFragmentAdapter";
 
     public MainFragmentAdapter(List<MusicModel> modelList) {

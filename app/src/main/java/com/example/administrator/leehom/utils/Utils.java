@@ -2,6 +2,7 @@ package com.example.administrator.leehom.utils;
 
 import android.text.TextUtils;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -17,6 +18,10 @@ import static android.R.id.list;
 public class Utils {
     public static boolean checkNull(Object obj) {
         return obj == null;
+    }
+
+    public static boolean checkNull(File file) {
+        return file == null || !file.exists() || file.length() <= 0;
     }
 
     public static boolean checkNull(Set set) {
