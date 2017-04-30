@@ -65,7 +65,7 @@ public class MusicModel {
         ContentValues values = new ContentValues();
         String name = getUrl();
         int index = name.lastIndexOf("/");
-        name = name.substring(index, name.length() - 1);
+        name = name.substring(index + 1, name.length());
         values.put("name", name);
         values.put("url", this.getUrl());
         return values;

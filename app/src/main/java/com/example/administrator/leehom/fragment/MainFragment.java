@@ -59,7 +59,7 @@ public class MainFragment extends FragmentBase {
     }
 
     private void updateRecyclerView() {
-        ThreadPoolProxyFactory.getDbThreadPoolProxy().execute(queryDbRunable);
+        ThreadPoolProxyFactory.getNormalThreadPoolProxy().execute(queryDbRunable);
     }
 
     // TODO 可能会造成内存泄漏
@@ -93,7 +93,7 @@ public class MainFragment extends FragmentBase {
     public void onDestroy() {
         Log.e(TAG, "onDestroy()");
         super.onDestroy();
-        ThreadPoolProxyFactory.getDbThreadPoolProxy().remove(queryDbRunable);
+        ThreadPoolProxyFactory.getNormalThreadPoolProxy().remove(queryDbRunable);
     }
 
     private DbHandler mDbHandler = new DbHandler(this);
@@ -121,7 +121,7 @@ public class MainFragment extends FragmentBase {
 
     public void refreshListUI(List<MusicModel> modelList) {
         Log.i(TAG, "refreshListUI modelList :" + modelList);
-        if (Utils.checkNull(mFragmentAdapter)) {
+        if (!Utils.checkNull(mFragmentAdapter)) {
             mFragmentAdapter.updataRefresh(modelList);
         }
     }

@@ -56,7 +56,7 @@ public class LocalMusicSearcher {
 
     public void getPath(File rootFile) {
         // 扫描太快的话，TextView内容更新速度跟不上 空100毫秒用于TextView绘制
-        SystemClock.sleep(100);
+        SystemClock.sleep(50);
         // Log.i("wzy", "getPath() :" + rootFile != null ? rootFile.getAbsolutePath() : null);
         if (mListener != null) {
             mListener.searching(rootFile != null ? rootFile.getAbsolutePath() : null);
@@ -109,6 +109,7 @@ public class LocalMusicSearcher {
             Log.e(TAG, "mContext == null");
             return;
         }
+        Log.i("wzy", "saveToDb :" + path);
         long insert = MusicDao.getInstance(mContext).insert(path);
         if (insert <= 0) {
             Log.e(TAG, "saveToDb insert fail");
