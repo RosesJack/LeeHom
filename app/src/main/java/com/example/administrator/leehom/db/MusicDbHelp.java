@@ -13,12 +13,25 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 
 public class MusicDbHelp extends SQLiteOpenHelper {
+
+    /**
+        tilte
+        album
+        artist
+        url
+        duration
+        size
+     */
     public static final String TABLE_NAME = "music_list";
     private final static String CREATE_DB_SQL =
             "create table " + TABLE_NAME + "" +
                     " (_id integer primary key autoincrement" +
-                    ",name varchar(30)" +
-                    ",url varchar(30)" +
+                    ",tilte varchar(100)" +
+                    ",album varchar(100)" +
+                    ",artist varchar(100)" +
+                    ",url varchar(255)" +
+                    ",duration varchar(100)" +
+                    ",size bigint " +
                     // 插入时间戳
                     ",time TimeStamp NOT NULL DEFAULT CURRENT_TIMESTAMP " +
                     ")";

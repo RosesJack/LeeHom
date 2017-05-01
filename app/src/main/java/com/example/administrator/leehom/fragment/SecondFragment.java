@@ -92,15 +92,19 @@ public class SecondFragment extends FragmentBase implements View.OnClickListener
 
             @Override
             public void searching(String path) {
-                Message message = new Message();
+                Message message = Message.obtain();
                 message.obj = path;
                 message.what = SearcherHandler.MUSIC_SEARCHING;
-                searcherHandler.sendMessageDelayed(message, 1000);
+                searcherHandler.sendMessage(message);
                 Log.i(TAG, "searching :" + path);
             }
 
             @Override
             public void stop() {
+                Message message = Message.obtain();
+                message.obj = path;
+                message.what = SearcherHandler.MUSIC_SEARCHING_STOP;
+                searcherHandler.sendMessage(message);
                 Log.i(TAG, "stop ");
             }
         });

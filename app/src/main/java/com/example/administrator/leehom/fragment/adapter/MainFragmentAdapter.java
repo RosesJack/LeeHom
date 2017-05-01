@@ -23,6 +23,7 @@ import java.util.List;
 
 public class MainFragmentAdapter extends BaseAdapter<MusicModel> {
     private final static String TAG = "MainFragmentAdapter";
+    private RecyclerViewItemClickListener mItemClickListener;
 
     public MainFragmentAdapter(List<MusicModel> modelList) {
         mData = modelList;
@@ -32,6 +33,14 @@ public class MainFragmentAdapter extends BaseAdapter<MusicModel> {
     public BaseViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater f = LayoutInflater.from(parent.getContext()).cloneInContext(parent.getContext());
         View itemView = f.inflate(R.layout.item_main, parent, false);
+        itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!Utils.checkNull(mItemClickListener)) {
+                    mItemClickListener.onItemClick(v);
+                }
+            }
+        });
         MainViewHolder mainViewHolder = new MainViewHolder(itemView);
         return mainViewHolder;
     }
@@ -49,9 +58,10 @@ public class MainFragmentAdapter extends BaseAdapter<MusicModel> {
                 Log.e(TAG, "musicModel == null");
                 return;
             }
-            mainViewHolder.mNameTextView.setText(musicModel.getName());
+            holder.bindView(musicModel);
+            mainViewHolder.mNameTextView.setText(musicModel.getTilte());
             // TODO 作者信息需要从文件的exif中提取
-            mainViewHolder.mOwnerTextView.setText(musicModel.getUrl());
+            mainViewHolder.mOwnerTextView.setText(musicModel.getArtist());
         }
     }
 
@@ -66,5 +76,9 @@ public class MainFragmentAdapter extends BaseAdapter<MusicModel> {
 
     public void setData(List<MusicModel> data) {
         mData = data;
+    }
+
+    public void setItemClickListener(RecyclerViewItemClickListener itemClickListener) {
+        mItemClickListener = itemClickListener;
     }
 }

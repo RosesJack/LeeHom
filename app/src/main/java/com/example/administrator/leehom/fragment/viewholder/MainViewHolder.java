@@ -4,6 +4,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.example.administrator.leehom.R;
+import com.example.administrator.leehom.model.MusicModel;
 
 /**
  * auther：wzy
@@ -11,7 +12,7 @@ import com.example.administrator.leehom.R;
  * desc:
  */
 
-public class MainViewHolder extends BaseViewHolder {
+public class MainViewHolder extends BaseViewHolder<MusicModel> {
     public TextView mNameTextView;
     public TextView mOwnerTextView;
 

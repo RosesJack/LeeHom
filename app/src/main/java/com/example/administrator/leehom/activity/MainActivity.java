@@ -48,6 +48,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mThird = (TextView) findViewById(R.id.third);
     }
 
+    /**
+     * 用于记录当前正在显示的Fragment
+     */
+    private Fragment mCurrentShowingFragment;
+
+    /**
+     * 防止Fragment的生命周期重新走一遍
+     * TODO 可能存在按下home进程进入后台再进入 内存中的fragment对象被清空 会有异常bug
+     *
+     * @param clazz
+     * @param isNewStart
+     */
     private void setFragment(Class clazz, boolean isNewStart) {
         Fragment fragment = createFragment(clazz, isNewStart);
         if (Utils.checkNull(fragment)) {
@@ -55,7 +67,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_container, fragment);
+        String simpleName = clazz.getSimpleName();
+        Fragment fragmentByTag = fragmentManager.findFragmentByTag(simpleName);
+        if (!Utils.checkNull(mCurrentShowingFragment)) {
+            fragmentTransaction.hide(mCurrentShowingFragment);
+        }
+        if (Utils.checkNull(fragmentByTag)) {
+            fragmentTransaction.add(R.id.fragment_container, fragment, simpleName);
+            mCurrentShowingFragment = fragment;
+            fragmentTransaction.show(fragment);
+        } else {
+            fragmentTransaction.show(fragmentByTag);
+            mCurrentShowingFragment = fragmentByTag;
+        }
         fragmentTransaction.commit();
     }
 
@@ -95,13 +119,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             try {
                 newInstance2 = (Fragment) fragment.newInstance();
                 mAllFragments.put(fragment.getSimpleName(), newInstance2);
+                return newInstance2;
             } catch (InstantiationException e) {
                 e.printStackTrace();
+                return null;
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
+                return null;
             }
         }
-        return null;
     }
 
     @Override

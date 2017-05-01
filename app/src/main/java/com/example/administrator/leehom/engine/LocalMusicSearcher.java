@@ -1,8 +1,10 @@
 package com.example.administrator.leehom.engine;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.os.Environment;
 import android.os.SystemClock;
+import android.provider.MediaStore;
 import android.util.Log;
 
 import com.example.administrator.leehom.db.dao.MusicDao;
@@ -29,9 +31,59 @@ public class LocalMusicSearcher {
     public void search(Context context, SearchListener listener) {
         mListener = listener;
         mContext = context;
-        ThreadPoolProxyFactory.getDbThreadPoolProxy().execute(searcheRunable);
+        ThreadPoolProxyFactory.getDbThreadPoolProxy().execute(systemMusicDbSearchRunnable);
     }
 
+    /**
+     * 调用系统存储多媒体信息的数据库
+     */
+    private Runnable systemMusicDbSearchRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (mContext == null) {
+                Log.e(TAG, "mContext == null");
+                return;
+            }
+            if (!Utils.checkNull(mListener)) {
+                mListener.start();
+            }
+            Cursor cursor = mContext.getContentResolver()
+                    .query
+                            (MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                                    null, null, null,
+                                    MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+            while (cursor.moveToNext()) {
+                String tilte = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
+                String album = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
+                String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
+                String url = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+                int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
+                long size = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
+                MusicModel musicModel = new MusicModel();
+                musicModel.setTilte(tilte);
+                musicModel.setAlbum(album);
+                musicModel.setArtist(artist);
+                musicModel.setUrl(url);
+                musicModel.setDuration(duration);
+                musicModel.setSize(size);
+                Log.i(TAG, "db search :" + musicModel);
+                // 延时100毫秒用于界面显示
+                SystemClock.sleep(100);
+                if (!Utils.checkNull(mListener)) {
+                    mListener.searching(tilte);
+                }
+                MusicDao.getInstance(mContext).insert(musicModel);
+            }
+            if (!Utils.checkNull(mListener)) {
+                mListener.stop();
+            }
+        }
+    };
+
+
+    /**
+     * 扫描所有文件的方式，效率太低了
+     */
     private Runnable searcheRunable = new Runnable() {
         @Override
         public void run() {
@@ -117,7 +169,7 @@ public class LocalMusicSearcher {
     }
 
     public void stop() {
-        ThreadPoolProxyFactory.getDbThreadPoolProxy().remove(searcheRunable);
-        searcheRunable = null;
+        ThreadPoolProxyFactory.getDbThreadPoolProxy().remove(systemMusicDbSearchRunnable);
+        systemMusicDbSearchRunnable = null;
     }
 }

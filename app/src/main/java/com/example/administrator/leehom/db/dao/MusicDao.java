@@ -12,8 +12,6 @@ import com.example.administrator.leehom.utils.Utils;
 
 import java.util.List;
 
-import static android.R.id.list;
-
 
 /**
  * auther：wzy
@@ -136,12 +134,7 @@ public class MusicDao implements DbDao<MusicModel> {
 
             writableDatabase.beginTransaction();
             for (MusicModel musicModel : list) {
-                String name = musicModel.getName();
                 String url = musicModel.getUrl();
-                if (!Utils.checkNull(name)) {
-                    deleteNum = writableDatabase.delete(MusicDbHelp.TABLE_NAME, "name=?", new String[]{name});
-                    continue;
-                }
                 if (!Utils.checkNull(url)) {
                     deleteNum = writableDatabase.delete(MusicDbHelp.TABLE_NAME, "url=?", new String[]{url});
                     continue;

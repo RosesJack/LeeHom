@@ -11,10 +11,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.example.administrator.leehom.R;
 import com.example.administrator.leehom.db.dao.MusicDao;
 import com.example.administrator.leehom.fragment.adapter.MainFragmentAdapter;
+import com.example.administrator.leehom.fragment.adapter.RecyclerViewItemClickListener;
 import com.example.administrator.leehom.model.MusicModel;
 import com.example.administrator.leehom.thread.ThreadPoolProxyFactory;
 import com.example.administrator.leehom.utils.Utils;
@@ -43,7 +45,26 @@ public class MainFragment extends FragmentBase {
         mRecyclerView = (RecyclerView) view.findViewById(R.id.music_list);
         mContext = container.getContext();
         initData();
+        initListener();
         return view;
+    }
+
+    private void initListener() {
+        if (Utils.checkNull(mFragmentAdapter)) {
+            Log.e(TAG, "mRecyclerView == null");
+            return;
+        }
+        mFragmentAdapter.setItemClickListener(new RecyclerViewItemClickListener() {
+            @Override
+            public void onItemClick(View view) {
+                Object obj = view.getTag();
+                if (!Utils.checkNull(obj) && obj instanceof MusicModel) {
+                    MusicModel musicModel = (MusicModel) obj;
+                    Toast.makeText(mContext, " " + musicModel, Toast.LENGTH_SHORT).show();
+                    Log.i(TAG, "musicModel :" + musicModel);
+                }
+            }
+        });
     }
 
     private void initData() {
