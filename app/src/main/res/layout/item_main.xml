@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="50dp"
-              android:background="@color/colortest"
+              android:background="@drawable/main_item_selector"
               android:orientation="vertical">
 
     <TextView
@@ -24,8 +24,9 @@
         android:paddingLeft="20dp"
         android:text="王力宏"
         android:textSize="20sp"/>
+
     <View
-        android:background="@color/colorBlack"
         android:layout_width="match_parent"
-        android:layout_height="1dp"/>
+        android:layout_height="1dp"
+        android:background="@color/colorBlack"/>
 </LinearLayout>

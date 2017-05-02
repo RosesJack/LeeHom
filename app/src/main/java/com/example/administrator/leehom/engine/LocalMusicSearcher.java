@@ -72,7 +72,8 @@ public class LocalMusicSearcher {
                 if (!Utils.checkNull(mListener)) {
                     mListener.searching(tilte);
                 }
-                MusicDao.getInstance(mContext).insert(musicModel);
+                long insert = MusicDao.getInstance(mContext).insert(musicModel);
+                Log.i(TAG, "insert :" + insert);
             }
             if (!Utils.checkNull(mListener)) {
                 mListener.stop();

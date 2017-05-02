@@ -37,7 +37,6 @@ public class ExampleInstrumentedTest {
         for (int i = 0; i < 7; i++) {
             MusicModel musicModel = new MusicModel();
             musicModel.setUrl("url==" + i);
-            musicModel.setName("name==" + i);
             models.add(musicModel);
         }
         long insert = MusicDao.getInstance(InstrumentationRegistry.getTargetContext()).insert(models);

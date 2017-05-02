@@ -2,11 +2,13 @@ package com.example.administrator.leehom.model;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static android.R.attr.name;
+import static com.bumptech.glide.gifdecoder.GifHeaderParser.TAG;
 
 /**
  * auther：wzy
@@ -123,7 +125,7 @@ public class MusicModel {
             musicModel.artist = artist;
             musicModel.album = album;
             musicModel.id = id;
-
+            Log.i(TAG, "musicModel :" + musicModel);
             models.add(musicModel);
         }
         return models;

@@ -1,6 +1,7 @@
 package com.example.administrator.leehom.fragment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -14,15 +15,20 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.example.administrator.leehom.R;
+import com.example.administrator.leehom.activity.MainActivity;
 import com.example.administrator.leehom.db.dao.MusicDao;
 import com.example.administrator.leehom.fragment.adapter.MainFragmentAdapter;
 import com.example.administrator.leehom.fragment.adapter.RecyclerViewItemClickListener;
+import com.example.administrator.leehom.model.AppContant;
 import com.example.administrator.leehom.model.MusicModel;
+import com.example.administrator.leehom.service.MusicPlayService;
 import com.example.administrator.leehom.thread.ThreadPoolProxyFactory;
 import com.example.administrator.leehom.utils.Utils;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
+
+import static com.example.administrator.leehom.model.AppContant.StringFlag.PLAY_URL;
 
 /**
  * auther：wzy
@@ -58,10 +64,14 @@ public class MainFragment extends FragmentBase {
             @Override
             public void onItemClick(View view) {
                 Object obj = view.getTag();
-                if (!Utils.checkNull(obj) && obj instanceof MusicModel) {
+                if (!Utils.checkNull(obj) && obj instanceof MusicModel && !Utils.checkNull(mContext)) {
                     MusicModel musicModel = (MusicModel) obj;
-                    Toast.makeText(mContext, " " + musicModel, Toast.LENGTH_SHORT).show();
                     Log.i(TAG, "musicModel :" + musicModel);
+                    Intent intent = new Intent();
+                    intent.putExtra(AppContant.StringFlag.PLAY_URL, musicModel.getUrl());
+                    intent.putExtra(AppContant.StringFlag.PLAY_MESSAGE, AppContant.PlayMessage.PLAY);
+                    intent.setClass(mContext, MusicPlayService.class);
+                    mContext.startService(intent);
                 }
             }
         });
