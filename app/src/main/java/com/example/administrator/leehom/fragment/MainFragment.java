@@ -1,5 +1,6 @@
 package com.example.administrator.leehom.fragment;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -33,6 +34,7 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 
 import static android.content.Context.BIND_AUTO_CREATE;
+import static android.os.Build.VERSION_CODES.M;
 import static com.example.administrator.leehom.model.AppContant.StringFlag.PLAY_URL;
 
 /**
@@ -44,22 +46,10 @@ import static com.example.administrator.leehom.model.AppContant.StringFlag.PLAY_
 public class MainFragment extends FragmentBase {
     private final static String TAG = "MainFragment";
     private RecyclerView mRecyclerView;
-    private Context mContext;
+    private MainActivity mActivity;
     private List<MusicModel> mData;
     private MainFragmentAdapter mFragmentAdapter;
-
     private IService mMusicBinder;
-    private ServiceConnection mConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            mMusicBinder = (IService) service;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            Log.w(TAG, "service connected failed");
-        }
-    };
 
     @Nullable
     @Override
@@ -81,11 +71,11 @@ public class MainFragment extends FragmentBase {
             @Override
             public void onItemClick(View view) {
                 Object obj = view.getTag();
-                if (!Utils.checkNull(obj) && obj instanceof MusicModel && !Utils.checkNull(mContext)) {
+                if (!Utils.checkNull(obj) && obj instanceof MusicModel) {
                     MusicModel musicModel = (MusicModel) obj;
                     Log.i(TAG, "musicModel :" + musicModel);
-                    if (!Utils.checkNull(mMusicBinder)) {
-                        mMusicBinder.musicPlay(musicModel.getUrl());
+                    if (!Utils.checkNull(mActivity)) {
+                        mActivity.play(musicModel.getUrl());
                     }
                 }
             }
@@ -93,10 +83,10 @@ public class MainFragment extends FragmentBase {
     }
 
     private void initData() {
-        if (Utils.checkNull(mRecyclerView) || Utils.checkNull(mContext)) {
+        if (Utils.checkNull(mRecyclerView) || Utils.checkNull(mActivity)) {
             return;
         }
-        LinearLayoutManager layout = new LinearLayoutManager(mContext);
+        LinearLayoutManager layout = new LinearLayoutManager(mActivity);
         layout.setOrientation(LinearLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(layout);
         mFragmentAdapter = new MainFragmentAdapter(mData);
@@ -112,7 +102,7 @@ public class MainFragment extends FragmentBase {
     private Runnable queryDbRunable = new Runnable() {
         @Override
         public void run() {
-            List<MusicModel> models = MusicDao.getInstance(mContext).queryAll();
+            List<MusicModel> models = MusicDao.getInstance(mActivity).queryAll();
             Log.i(TAG, "query all :" + models);
             if (!Utils.checkNull(mDbHandler)) {
                 Message message = Message.obtain();
@@ -127,14 +117,9 @@ public class MainFragment extends FragmentBase {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         Log.i(TAG, "onCreate");
-        mContext = getActivity();
         super.onCreate(savedInstanceState);
-        if (Utils.checkNull(mConnection)) {
-            return;
-        }
-        Intent intent = new Intent();
-        intent.setClass(mContext, MusicPlayService.class);
-        mContext.bindService(intent, mConnection, BIND_AUTO_CREATE);
+        mActivity = (MainActivity) getActivity();
+        mMusicBinder = mActivity.getMusicBinder();
     }
 
     public static MainFragment getInstance() {

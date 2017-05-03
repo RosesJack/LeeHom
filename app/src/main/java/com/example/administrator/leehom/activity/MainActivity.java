@@ -3,8 +3,14 @@ package com.example.administrator.leehom.activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
@@ -13,6 +19,8 @@ import com.example.administrator.leehom.R;
 import com.example.administrator.leehom.fragment.MainFragment;
 import com.example.administrator.leehom.fragment.SecondFragment;
 import com.example.administrator.leehom.fragment.ThridFragment;
+import com.example.administrator.leehom.service.IService;
+import com.example.administrator.leehom.service.MusicPlayService;
 import com.example.administrator.leehom.utils.Utils;
 
 import java.util.HashMap;
@@ -24,16 +32,45 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextView mFirst;
     private TextView mSecond;
     private TextView mThird;
+    private final static String TAG = "MainActivity";
+    private Context mContext = this;
+    /**
+     * 音乐播放的binder
+     */
+    private IService mMusicBinder;
+    private ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mMusicBinder = (IService) service;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.w(TAG, "service connected failed");
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        bindMusicService();
         initMainView();
         initMainListener();
         if (mFirst != null) {
             mFirst.performClick();
         }
+    }
+
+    private boolean bindMusicService() {
+        if (Utils.checkNull(mConnection) || Utils.checkNull(mContext)) {
+            return true;
+        }
+        Intent intent = new Intent();
+        intent.setClass(mContext, MusicPlayService.class);
+        mContext.bindService(intent, mConnection, BIND_AUTO_CREATE);
+        return false;
     }
 
     private void initMainListener() {
@@ -144,4 +181,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
         }
     }
+
+    public IService getMusicBinder() {
+        return mMusicBinder;
+    }
+
+    public void play(String url) {
+        if (Utils.checkNull(mMusicBinder)) {
+            Log.e(TAG, "mMusicBinder is null");
+            return;
+        }
+        mMusicBinder.musicPlay(url);
+    }
+
 }
