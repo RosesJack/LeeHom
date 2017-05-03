@@ -35,7 +35,7 @@ public class SecondFragment extends FragmentBase implements View.OnClickListener
     private Button mSearchButton;
     private TextView mShowTextView;
     private Context mContext;
-    private static final String TAG = "SecondFragment";
+    public static final String TAG = "SecondFragment";
     private LocalMusicSearcher mLocalMusicSearcher;
     private final SearcherHandler searcherHandler = new SearcherHandler(this, Looper.getMainLooper());
 

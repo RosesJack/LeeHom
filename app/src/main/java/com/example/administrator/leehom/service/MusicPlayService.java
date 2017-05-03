@@ -3,6 +3,7 @@ package com.example.administrator.leehom.service;
 import android.app.Service;
 import android.content.Intent;
 import android.media.MediaPlayer;
+import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
@@ -20,13 +21,30 @@ import com.example.administrator.leehom.utils.Utils;
 
 public class MusicPlayService extends Service {
     private MediaPlayer mMediaPlayer;
+
+    public void setUrl(String url) {
+        mUrl = url;
+    }
+
+    public void setCurrentPlayStaus(int currentPlayStaus) {
+        mCurrentPlayStaus = currentPlayStaus;
+    }
+
+    public void setOldUrl(String oldUrl) {
+        mOldUrl = oldUrl;
+    }
+
+    public void setCurrentPosition(int currentPosition) {
+        mCurrentPosition = currentPosition;
+    }
+
     private String mUrl;
     private static final String TAG = "MusicPlayService";
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return new MusicBind(this);
     }
 
     @Override
@@ -38,7 +56,7 @@ public class MusicPlayService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        int message = intent.getIntExtra(AppContant.StringFlag.PLAY_MESSAGE, AppContant.PlayMessage.ERROR);
+        /*int message = intent.getIntExtra(AppContant.StringFlag.PLAY_MESSAGE, AppContant.PlayMessage.ERROR);
         mUrl = intent.getStringExtra(AppContant.StringFlag.PLAY_URL);
         switch (message) {
             case AppContant.PlayMessage.PLAY:
@@ -56,7 +74,7 @@ public class MusicPlayService extends Service {
                 error();
                 break;
 
-        }
+        }*/
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -194,6 +212,47 @@ public class MusicPlayService extends Service {
             if (mPosition > 0) {
                 mp.seekTo(mPosition);
             }
+        }
+    }
+
+    public static class MusicBind extends Binder implements IService {
+        private MusicPlayService mService;
+
+        public MusicBind(MusicPlayService service) {
+            mService = service;
+        }
+
+        @Override
+        public void musicPlay(String url) {
+            if (Utils.checkNull(mService)) {
+                return;
+            }
+            mService.setUrl(url);
+            mService.play();
+        }
+
+        @Override
+        public void musicPause() {
+            if (Utils.checkNull(mService)) {
+                return;
+            }
+            mService.pause();
+        }
+
+        @Override
+        public void musicContinuePlay() {
+            if (Utils.checkNull(mService)) {
+                return;
+            }
+            mService.continuePlay();
+        }
+
+        @Override
+        public void musicStop() {
+            if (Utils.checkNull(mService)) {
+                return;
+            }
+            mService.stop();
         }
     }
 }

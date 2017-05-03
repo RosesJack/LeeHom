@@ -19,10 +19,10 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorAccent"
         android:orientation="horizontal">
 
         <TextView
+            android:background="@drawable/bottom_item_selector"
             android:id="@+id/first"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -31,8 +31,13 @@
             android:paddingBottom="20dp"
             android:paddingTop="20dp"
             android:text="音乐列表"/>
+        <View
+            android:background="@color/colorBlack"
+            android:layout_width="1dp"
+            android:layout_height="match_parent"/>
 
         <TextView
+            android:background="@drawable/bottom_item_selector"
             android:id="@+id/second"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -40,9 +45,14 @@
             android:gravity="center"
             android:paddingBottom="20dp"
             android:paddingTop="20dp"
-            android:text="本地搜索"/>
+            android:text="播放中心"/>
 
+        <View
+            android:background="@color/colorBlack"
+            android:layout_width="1dp"
+            android:layout_height="match_parent"/>
         <TextView
+            android:background="@drawable/bottom_item_selector"
             android:id="@+id/third"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -50,6 +60,6 @@
             android:gravity="center"
             android:paddingBottom="20dp"
             android:paddingTop="20dp"
-            android:text="其他"/>
+            android:text="本地搜索"/>
     </LinearLayout>
 </LinearLayout>

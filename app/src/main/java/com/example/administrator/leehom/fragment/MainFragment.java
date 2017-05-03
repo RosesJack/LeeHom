@@ -1,9 +1,12 @@
 package com.example.administrator.leehom.fragment;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -21,6 +24,7 @@ import com.example.administrator.leehom.fragment.adapter.MainFragmentAdapter;
 import com.example.administrator.leehom.fragment.adapter.RecyclerViewItemClickListener;
 import com.example.administrator.leehom.model.AppContant;
 import com.example.administrator.leehom.model.MusicModel;
+import com.example.administrator.leehom.service.IService;
 import com.example.administrator.leehom.service.MusicPlayService;
 import com.example.administrator.leehom.thread.ThreadPoolProxyFactory;
 import com.example.administrator.leehom.utils.Utils;
@@ -28,6 +32,7 @@ import com.example.administrator.leehom.utils.Utils;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
+import static android.content.Context.BIND_AUTO_CREATE;
 import static com.example.administrator.leehom.model.AppContant.StringFlag.PLAY_URL;
 
 /**
@@ -43,13 +48,25 @@ public class MainFragment extends FragmentBase {
     private List<MusicModel> mData;
     private MainFragmentAdapter mFragmentAdapter;
 
+    private IService mMusicBinder;
+    private ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mMusicBinder = (IService) service;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.w(TAG, "service connected failed");
+        }
+    };
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         Log.i(TAG, "onCreateView");
         View view = inflater.inflate(R.layout.fragment_main, container, false);
         mRecyclerView = (RecyclerView) view.findViewById(R.id.music_list);
-        mContext = container.getContext();
         initData();
         initListener();
         return view;
@@ -67,11 +84,9 @@ public class MainFragment extends FragmentBase {
                 if (!Utils.checkNull(obj) && obj instanceof MusicModel && !Utils.checkNull(mContext)) {
                     MusicModel musicModel = (MusicModel) obj;
                     Log.i(TAG, "musicModel :" + musicModel);
-                    Intent intent = new Intent();
-                    intent.putExtra(AppContant.StringFlag.PLAY_URL, musicModel.getUrl());
-                    intent.putExtra(AppContant.StringFlag.PLAY_MESSAGE, AppContant.PlayMessage.PLAY);
-                    intent.setClass(mContext, MusicPlayService.class);
-                    mContext.startService(intent);
+                    if (!Utils.checkNull(mMusicBinder)) {
+                        mMusicBinder.musicPlay(musicModel.getUrl());
+                    }
                 }
             }
         });
@@ -112,8 +127,14 @@ public class MainFragment extends FragmentBase {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         Log.i(TAG, "onCreate");
+        mContext = getActivity();
         super.onCreate(savedInstanceState);
-
+        if (Utils.checkNull(mConnection)) {
+            return;
+        }
+        Intent intent = new Intent();
+        intent.setClass(mContext, MusicPlayService.class);
+        mContext.bindService(intent, mConnection, BIND_AUTO_CREATE);
     }
 
     public static MainFragment getInstance() {

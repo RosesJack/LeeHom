@@ -15,6 +15,8 @@ import com.example.administrator.leehom.R;
  */
 
 public class ThridFragment extends FragmentBase {
+    public static final String TAG = "ThridFragment";
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {

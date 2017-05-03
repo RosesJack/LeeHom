@@ -137,10 +137,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 setFragment(MainFragment.class, false);
                 break;
             case R.id.second:
-                setFragment(SecondFragment.class, false);
+                setFragment(ThridFragment.class, false);
                 break;
             case R.id.third:
-                setFragment(ThridFragment.class, false);
+                setFragment(SecondFragment.class, false);
                 break;
         }
     }
