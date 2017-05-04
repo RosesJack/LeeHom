@@ -6,4 +6,6 @@
     <color name="colortest">#F081</color>
     <color name="colorBlack">#000</color>
     <color name="colorWhite">#fff</color>
+    <color name="colorGrey">#afa9a9</color>
+    <color name="colorSeek">#d42b2b</color>
 </resources>
