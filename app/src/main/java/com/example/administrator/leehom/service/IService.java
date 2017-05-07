@@ -14,4 +14,18 @@ public interface IService {
     void musicContinuePlay();
 
     void musicStop();
+
+    void musicProgressMoveTo(int position);
+
+    int getcurrentPosition();
+
+    int getDuration();
+
+    void continuePlay();
+
+    void pause();
+
+    void pauseOrResumeMusic();
+
+    int getCurrentPlayState();
 }

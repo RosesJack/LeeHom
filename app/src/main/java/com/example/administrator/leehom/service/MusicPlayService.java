@@ -12,6 +12,8 @@ import android.util.Log;
 import com.example.administrator.leehom.model.AppContant;
 import com.example.administrator.leehom.utils.Utils;
 
+import java.io.IOException;
+
 
 /**
  * auther：wzy
@@ -20,6 +22,7 @@ import com.example.administrator.leehom.utils.Utils;
  */
 
 public class MusicPlayService extends Service {
+    // TODO 定时检索本地数据库
     private MediaPlayer mMediaPlayer;
 
     public void setUrl(String url) {
@@ -52,6 +55,14 @@ public class MusicPlayService extends Service {
         super.onCreate();
         // 第一次绑定服务的时候创建
         mMediaPlayer = new MediaPlayer();
+        mUrl = getLastMusicFromSp();
+        try {
+            // 避免再次进入时mediaplayer还未加载url不能获取到音乐文件的duration
+            mMediaPlayer.setDataSource(mUrl);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        mCurrentPosition = getLastMusicPositionFromSp();
     }
 
     @Override
@@ -115,7 +126,7 @@ public class MusicPlayService extends Service {
     /**
      * 存储暂停后的播放进度
      */
-    private int mCurrentPosition;
+    private int mCurrentPosition = 0;
 
     private void play() {
         /*
@@ -154,7 +165,7 @@ public class MusicPlayService extends Service {
                 break;
             case AppContant.PlayMessage.STOP:
                 // 停止状态下,直接播放
-                play(0);
+                play(mCurrentPosition);
                 break;
         }
 
@@ -182,6 +193,7 @@ public class MusicPlayService extends Service {
             mMediaPlayer.setDataSource(mUrl);
             mMediaPlayer.prepare();  //进行缓冲
             mMediaPlayer.setOnPreparedListener(new PreparedListener(position));//注册一个监听器
+            mCurrentPlayStaus = AppContant.PlayMessage.PLAY;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -207,7 +219,6 @@ public class MusicPlayService extends Service {
         @Override
         public void onPrepared(MediaPlayer mp) {
             mp.start();
-            mCurrentPlayStaus = AppContant.PlayMessage.PLAY;
             mOldUrl = mUrl;
             if (mPosition > 0) {
                 mp.seekTo(mPosition);
@@ -227,7 +238,9 @@ public class MusicPlayService extends Service {
             if (Utils.checkNull(mService)) {
                 return;
             }
-            mService.setUrl(url);
+            if (!Utils.checkNull(url)) {
+                mService.setUrl(url);
+            }
             mService.play();
         }
 
@@ -254,6 +267,100 @@ public class MusicPlayService extends Service {
             }
             mService.stop();
         }
+
+        @Override
+        public void musicProgressMoveTo(int position) {
+            mService.musicProgressMoveTo(position);
+        }
+
+        @Override
+        public int getcurrentPosition() {
+
+            return mService.getcurrentPosition();
+        }
+
+        @Override
+        public int getDuration() {
+            return mService.getDuration();
+        }
+
+        @Override
+        public void continuePlay() {
+            mService.continuePlay();
+        }
+
+        @Override
+        public void pause() {
+            mService.pause();
+        }
+
+        @Override
+        public void pauseOrResumeMusic() {
+            mService.pauseOrResumeMusic();
+        }
+
+        @Override
+        public int getCurrentPlayState() {
+            return mService.getCurrentPlayState();
+        }
+    }
+
+    private int getCurrentPlayState() {
+        return mCurrentPlayStaus;
+    }
+
+    private void pauseOrResumeMusic() {
+        if (mCurrentPlayStaus == AppContant.PlayMessage.PLAY) {
+            pause();
+        } else {
+
+        }
+    }
+
+    private int getDuration() {
+        if (mMediaPlayer == null) {
+            return -1;
+        }
+        return mMediaPlayer.getDuration();
+    }
+
+    private int getcurrentPosition() {
+        if (mMediaPlayer == null) {
+            return -1;
+        }
+        return mMediaPlayer.getCurrentPosition();
+    }
+
+    private void musicProgressMoveTo(int position) {
+        if (mMediaPlayer != null) {
+            mMediaPlayer.seekTo(position);
+        }
+    }
+
+    private static final String LAST_MUSIC_NAME = "LAST_MUSIC_NAME";
+    public static final String LAST_MUSIC_POSITION = "LAST_MUSIC_POSITION";
+    public static final String LAST_MUSIC_DURATION = "LAST_MUSIC_DURATION";
+
+    public void saveLastMusicToSp() {
+        Utils.SharedPreferencesUtils.setParam(this, LAST_MUSIC_NAME, mUrl);
+        Utils.SharedPreferencesUtils.setParam(this,
+                LAST_MUSIC_POSITION, mMediaPlayer == null ? 0 : mMediaPlayer.getCurrentPosition());
+        Utils.SharedPreferencesUtils.setParam(this,
+                LAST_MUSIC_DURATION, mMediaPlayer == null ? 0 : mMediaPlayer.getDuration());
+    }
+
+    private String getLastMusicFromSp() {
+        return (String) Utils.SharedPreferencesUtils.getParam(this, LAST_MUSIC_NAME, "");
+    }
+
+    private int getLastMusicPositionFromSp() {
+        return (int) Utils.SharedPreferencesUtils.getParam(this, LAST_MUSIC_POSITION, 0);
+    }
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        saveLastMusicToSp();
+        return super.onUnbind(intent);
     }
 }
 

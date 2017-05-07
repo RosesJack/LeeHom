@@ -1,5 +1,6 @@
 package com.example.administrator.leehom.activity;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -26,8 +27,14 @@ import com.example.administrator.leehom.utils.Utils;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.example.administrator.leehom.service.MusicPlayService.LAST_MUSIC_DURATION;
+import static com.example.administrator.leehom.service.MusicPlayService.LAST_MUSIC_POSITION;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+
+/**
+ * TODO 在该页面后，点击该页面所属按钮不应再有动作
+ */
+public class MainActivity extends Activity implements View.OnClickListener {
 
     private TextView mFirst;
     private TextView mSecond;
@@ -135,16 +142,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Fragment createFragment(Class fragment, boolean isNewStart) {
         // 重新开启fragment
         if (isNewStart) {
-            try {
-                Fragment newInstance = (Fragment) fragment.newInstance();
-                mAllFragments.put(fragment.getSimpleName(), newInstance);
-                return newInstance;
-            } catch (InstantiationException e) {
-                e.printStackTrace();
-                return null;
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-                return null;
+            if (fragment == MainFragment.class) {
+                return MainFragment.getInstance();
+            } else if (fragment == SecondFragment.class) {
+                return SecondFragment.getInstance();
+
+            } else if (fragment == ThridFragment.class) {
+                return ThridFragment.getInstance(getLastMusicPositionFromSp(), getLastMusicDurationFromSp());
             }
         }
         // 沿用老的fragment
@@ -152,19 +156,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (mAllFragments.containsKey(key)) {
             return mAllFragments.get(key);
         } else {
-            Fragment newInstance2 = null;
-            try {
-                newInstance2 = (Fragment) fragment.newInstance();
-                mAllFragments.put(fragment.getSimpleName(), newInstance2);
-                return newInstance2;
-            } catch (InstantiationException e) {
-                e.printStackTrace();
-                return null;
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-                return null;
+            if (fragment == MainFragment.class) {
+                return MainFragment.getInstance();
+            } else if (fragment == SecondFragment.class) {
+                return SecondFragment.getInstance();
+
+            } else if (fragment == ThridFragment.class) {
+                return ThridFragment.getInstance(getLastMusicPositionFromSp(), getLastMusicDurationFromSp());
             }
         }
+        return null;
     }
 
     @Override
@@ -194,4 +195,64 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mMusicBinder.musicPlay(url);
     }
 
+    public void musicProgressMoveTo(int position) {
+        if (Utils.checkNull(mMusicBinder)) {
+            Log.e(TAG, "mMusicBinder is null");
+            return;
+        }
+        mMusicBinder.musicProgressMoveTo(position);
+    }
+
+    public int getcurrentPosition() {
+        if (Utils.checkNull(mMusicBinder)) {
+            Log.e(TAG, "mMusicBinder is null");
+            return -1;
+        }
+        return mMusicBinder.getcurrentPosition();
+    }
+
+    public int getDuration() {
+        if (Utils.checkNull(mMusicBinder)) {
+            Log.e(TAG, "mMusicBinder is null");
+            return -1;
+        }
+        return mMusicBinder.getDuration();
+    }
+
+    public void pauseOrResumeMusic() {
+        if (Utils.checkNull(mMusicBinder)) {
+            Log.e(TAG, "mMusicBinder is null");
+        }
+        mMusicBinder.pause();
+    }
+
+    public int getCurrentPlayState() {
+        if (Utils.checkNull(mMusicBinder)) {
+            Log.e(TAG, "mMusicBinder is null");
+        }
+        return mMusicBinder.getCurrentPlayState();
+    }
+
+    public void pause() {
+        if (Utils.checkNull(mMusicBinder)) {
+            Log.e(TAG, "mMusicBinder is null");
+        }
+        mMusicBinder.pause();
+    }
+
+    public void continuePlay() {
+        if (Utils.checkNull(mMusicBinder)) {
+            Log.e(TAG, "mMusicBinder is null");
+        }
+        mMusicBinder.continuePlay();
+    }
+
+
+    private int getLastMusicPositionFromSp() {
+        return (int) Utils.SharedPreferencesUtils.getParam(this, LAST_MUSIC_POSITION, 0);
+    }
+
+    private int getLastMusicDurationFromSp() {
+        return (int) Utils.SharedPreferencesUtils.getParam(this, LAST_MUSIC_DURATION, 0);
+    }
 }
