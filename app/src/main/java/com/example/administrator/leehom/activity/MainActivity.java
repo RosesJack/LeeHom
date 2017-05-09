@@ -148,7 +148,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 return SecondFragment.getInstance();
 
             } else if (fragment == ThridFragment.class) {
-                return ThridFragment.getInstance(getLastMusicPositionFromSp(), getLastMusicDurationFromSp());
+                return ThridFragment.getInstance(getLastMusicPositionFromSp(), mMusicBinder.getDuration());
             }
         }
         // 沿用老的fragment
@@ -162,7 +162,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 return SecondFragment.getInstance();
 
             } else if (fragment == ThridFragment.class) {
-                return ThridFragment.getInstance(getLastMusicPositionFromSp(), getLastMusicDurationFromSp());
+                return ThridFragment.getInstance(getLastMusicPositionFromSp(), mMusicBinder.getDuration());
             }
         }
         return null;

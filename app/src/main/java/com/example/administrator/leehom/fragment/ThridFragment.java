@@ -41,7 +41,6 @@ public class ThridFragment extends FragmentBase {
             Log.i(TAG, "mRotateAnimation animation :" + currentRotateValue);
         }
     };
-    ;
 
     @Nullable
     @Override
@@ -66,7 +65,6 @@ public class ThridFragment extends FragmentBase {
                 .setAllDuration(duration)
                 .setCuttentPosition(currentPosition)
                 .play()
-                .start()
                 .setMusicProgressChangeListener(new MusicSeekBar.MusicProgressChangeListener() {
                     @Override
                     public void onProgressChangeOK(int postion) {
@@ -176,10 +174,9 @@ public class ThridFragment extends FragmentBase {
             Log.i(TAG, "onHiddenChanged  currentPostion:" + currentPostion + " ,duration :" + duration);
             if (currentPostion != -1 && duration != -1) {
                 play_progress
-                        .setCuttentPosition(currentPostion)
                         .setAllDuration(duration)
-                        .play()
-                        .start();
+                        .setCuttentPosition(currentPostion)
+                        .play();
             }
             setPlayStateByMusicPlayMedia();
         }
