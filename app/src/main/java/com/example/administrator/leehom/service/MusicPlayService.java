@@ -303,6 +303,16 @@ public class MusicPlayService extends Service {
         public int getCurrentPlayState() {
             return mService.getCurrentPlayState();
         }
+
+        @Override
+        public void currentMusicPlayOver() {
+            mService.currentMusicPlayOver();
+        }
+    }
+
+    private void currentMusicPlayOver() {
+        setCurrentPlayStaus(AppContant.PlayMessage.STOP);
+        mCurrentPosition = 0;
     }
 
     private int getCurrentPlayState() {

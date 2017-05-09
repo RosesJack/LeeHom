@@ -17,6 +17,8 @@ import com.example.administrator.leehom.activity.MainActivity;
 import com.example.administrator.leehom.model.AppContant;
 import com.example.administrator.leehom.utils.MusicSeekBar;
 
+import static android.R.attr.duration;
+
 
 /**
  * auther：wzy
@@ -52,13 +54,15 @@ public class ThridFragment extends FragmentBase {
         play_or_pause = (TextView) view.findViewById(R.id.play_or_pause);
         play_progress = (MusicSeekBar) view.findViewById(R.id.play_progress);
         musicBg = view.findViewById(R.id.music_bg_container);
+        Log.i(TAG, "www onCreateView duration: " + duration);
+        Log.i(TAG, "www onCreateView currentPosition: " + currentPosition);
         /*
             音乐进度的显示
             1、用SeekBar显示，一下简称sb，
             2、sb能实时展示当前进度，能调节进度（提供一个进度手动改变的回调接口出来）
             3、sb能记录当前进度，下次进入时还在该进度，这需要media也记录上一次播放的曲目
          */
-        play_progress = play_progress
+        play_progress
                 .setAllDuration(duration)
                 .setCuttentPosition(currentPosition)
                 .play()
@@ -70,6 +74,17 @@ public class ThridFragment extends FragmentBase {
                         Log.i(TAG, "onProgressChangeOK:" + postion);
                         MainActivity activity = (MainActivity) getActivity();
                         activity.musicProgressMoveTo(postion);
+                    }
+
+                    @Override
+                    public void onProgressMoveEnd() {
+                        // 播放结束
+                        /*
+                        根据播放的格式来部署接下来的动作，包括循环播放，随机播放等等 播放模式写入sp
+                         */
+                        MainActivity activity = (MainActivity) getActivity();
+                        activity.currentMusicPlayOver();
+                        setPlayStateByMusicPlayMedia();
                     }
                 });
         play_or_pause.setOnClickListener(new View.OnClickListener() {
@@ -102,6 +117,7 @@ public class ThridFragment extends FragmentBase {
         if (id == R.id.play_or_pause) {
             MainActivity activity = (MainActivity) getActivity();
             int currentPlayState = activity.getCurrentPlayState();
+            Log.i(TAG, "www currentPlayState:" + currentPlayState);
             // 根据当前的播放状态来设置音乐播放的状态
             switch (currentPlayState) {
                 case AppContant.PlayMessage.PLAY:
@@ -130,6 +146,10 @@ public class ThridFragment extends FragmentBase {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        int currentPosition = getArguments().getInt(CURRENT_POSITION);
+        int duration = getArguments().getInt(DURATION);
+        Log.i(TAG, "www onCreate duration: " + duration);
+        Log.i(TAG, "www onCreate currentPosition: " + currentPosition);
     }
 
     public static ThridFragment getInstance(int currentPostion, int duration) {
@@ -155,7 +175,7 @@ public class ThridFragment extends FragmentBase {
             int duration = activity.getDuration();
             Log.i(TAG, "onHiddenChanged  currentPostion:" + currentPostion + " ,duration :" + duration);
             if (currentPostion != -1 && duration != -1) {
-                play_progress = play_progress
+                play_progress
                         .setCuttentPosition(currentPostion)
                         .setAllDuration(duration)
                         .play()
@@ -174,15 +194,15 @@ public class ThridFragment extends FragmentBase {
             case AppContant.PlayMessage.PLAY:
                 startRotateAnimation();
                 play_or_pause.setText("暂停");
-                play_progress.start();
                 play_progress.onPause();
+                play_progress.start();
                 break;
             case AppContant.PlayMessage.STOP:
                 // TODO 目前的场景只是再次进入的时候是停止状态，点击播放键，播放上次存储的音乐
                 play_or_pause.setText("播放");
-                play_progress.onPause();
+                play_progress.reset();
                 mRotateAnimation.removeAllListeners();
-                mRotateAnimation.end();
+                mRotateAnimation.cancel();
                 break;
             case AppContant.PlayMessage.PAUSE:
                 play_or_pause.setText("播放");

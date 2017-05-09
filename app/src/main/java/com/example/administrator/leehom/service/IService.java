@@ -28,4 +28,6 @@ public interface IService {
     void pauseOrResumeMusic();
 
     int getCurrentPlayState();
+
+    void currentMusicPlayOver();
 }

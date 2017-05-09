@@ -60,6 +60,12 @@ public class MusicSeekBar extends SeekBar {
         return this;
     }
 
+    public void reset() {
+        mCuttentPosition = 0;
+        mMusicHandler.removeCallbacksAndMessages(null);
+        this.setProgress(mCuttentPosition);
+    }
+
     private static class MusicHandler extends Handler {
         private WeakReference<MusicSeekBar> mMusicSeekBarWeakReference;
 
@@ -88,6 +94,11 @@ public class MusicSeekBar extends SeekBar {
         if (mCuttentPosition < mAllDuration) {
             Message message = Message.obtain();
             mMusicHandler.sendMessageDelayed(message, _1S);
+        } else {
+            if (!Utils.checkNull(mMusicProgressChangeListener)) {
+                mMusicProgressChangeListener.onProgressMoveEnd();
+                Log.i(TAG, "current music play end");
+            }
         }
     }
 
@@ -190,6 +201,7 @@ public class MusicSeekBar extends SeekBar {
 
     public interface MusicProgressChangeListener {
         void onProgressChangeOK(int postion);
+        void onProgressMoveEnd();
     }
 
     @Override

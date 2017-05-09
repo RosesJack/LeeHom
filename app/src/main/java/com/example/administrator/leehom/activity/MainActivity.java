@@ -255,4 +255,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private int getLastMusicDurationFromSp() {
         return (int) Utils.SharedPreferencesUtils.getParam(this, LAST_MUSIC_DURATION, 0);
     }
+
+    public void currentMusicPlayOver() {
+        if (Utils.checkNull(mMusicBinder)) {
+            Log.e(TAG, "mMusicBinder is null");
+        }
+        mMusicBinder.currentMusicPlayOver();
+    }
 }
