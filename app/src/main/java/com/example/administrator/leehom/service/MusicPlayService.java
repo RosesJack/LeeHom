@@ -14,6 +14,8 @@ import com.example.administrator.leehom.utils.Utils;
 
 import java.io.IOException;
 
+import static android.R.attr.duration;
+
 
 /**
  * auther：wzy
@@ -44,6 +46,11 @@ public class MusicPlayService extends Service {
     private String mUrl;
     private static final String TAG = "MusicPlayService";
 
+    /**
+     * media 是否准备好
+     * default false
+     */
+    private boolean isPrepared = false;
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -56,36 +63,12 @@ public class MusicPlayService extends Service {
         // 第一次绑定服务的时候创建
         mMediaPlayer = new MediaPlayer();
         mUrl = getLastMusicFromSp();
-        try {
-            // 避免再次进入时mediaplayer还未加载url不能获取到音乐文件的duration
-            mMediaPlayer.setDataSource(mUrl);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        mOldUrl = mUrl;
         mCurrentPosition = getLastMusicPositionFromSp();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        /*int message = intent.getIntExtra(AppContant.StringFlag.PLAY_MESSAGE, AppContant.PlayMessage.ERROR);
-        mUrl = intent.getStringExtra(AppContant.StringFlag.PLAY_URL);
-        switch (message) {
-            case AppContant.PlayMessage.PLAY:
-                // 从0开始播放
-                play();
-                break;
-            case AppContant.PlayMessage.PAUSE:
-                pause();
-                break;
-            case AppContant.PlayMessage.STOP:
-                stop();
-                break;
-            case AppContant.PlayMessage.ERROR:
-                // TODO 处理异常情况
-                error();
-                break;
-
-        }*/
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -101,6 +84,7 @@ public class MusicPlayService extends Service {
         mMediaPlayer.stop();
         mCurrentPlayStaus = AppContant.PlayMessage.STOP;
         mCurrentPosition = 0;
+        isPrepared = false;
     }
 
     private void pause() {
@@ -145,11 +129,14 @@ public class MusicPlayService extends Service {
             case AppContant.PlayMessage.PLAY:
                 // 正在播放的状态下,同一首歌(以url是否相同来区分是否是同一首歌曲)
                 if (TextUtils.equals(mOldUrl, mUrl)) {
+                    Log.i(TAG, "同一首歌则暂停");
                     // 同一首歌则暂停
                     pause();
                 } else {
                     stop();
-                    play(0);
+                    mCurrentPosition = 0;
+                    Log.i(TAG, "非一首歌从0播放");
+                    playReally();
                 }
                 break;
             case AppContant.PlayMessage.PAUSE:
@@ -157,18 +144,25 @@ public class MusicPlayService extends Service {
                 if (TextUtils.equals(mOldUrl, mUrl)) {
                     // 同一首歌则继续
                     // play(mCurrentPosition);
+                    Log.i(TAG, "同一首歌则继续");
                     continuePlay();
                 } else {
-                    stop();
-                    play(0);
+                    mCurrentPosition = 0;
+                    Log.i(TAG, "非同一首歌则继续");
+                    playReally();
                 }
                 break;
             case AppContant.PlayMessage.STOP:
-                // 停止状态下,直接播放
-                play(mCurrentPosition);
+                if (TextUtils.equals(mOldUrl, mUrl)) {
+                    Log.i(TAG, "在停止状态下，同一首歌继续");
+                    playReally();
+                } else {
+                    mCurrentPosition = 0;
+                    playReally();
+                    Log.i(TAG, "在停止状态下，非同一首歌从零开始");
+                }
                 break;
         }
-
     }
 
     /**
@@ -183,7 +177,7 @@ public class MusicPlayService extends Service {
         mCurrentPlayStaus = AppContant.PlayMessage.PLAY;
     }
 
-    public void play(int position) {
+    public void playReally() {
         if (Utils.checkNull(mMediaPlayer)) {
             Log.e(TAG, "play(int position) :  mMediaPlayer == null");
             return;
@@ -192,7 +186,7 @@ public class MusicPlayService extends Service {
             mMediaPlayer.reset();
             mMediaPlayer.setDataSource(mUrl);
             mMediaPlayer.prepare();  //进行缓冲
-            mMediaPlayer.setOnPreparedListener(new PreparedListener(position));//注册一个监听器
+            mMediaPlayer.setOnPreparedListener(new PreparedListener(mCurrentPosition));//注册一个监听器
             mCurrentPlayStaus = AppContant.PlayMessage.PLAY;
         } catch (Exception e) {
             e.printStackTrace();
@@ -223,6 +217,7 @@ public class MusicPlayService extends Service {
             if (mPosition > 0) {
                 mp.seekTo(mPosition);
             }
+            isPrepared = true;
         }
     }
 
@@ -328,17 +323,33 @@ public class MusicPlayService extends Service {
     }
 
     private int getDuration() {
+        int duration = -1;
         if (mMediaPlayer == null) {
             return -1;
         }
-        return mMediaPlayer.getDuration();
+        if (!isPrepared) {
+            duration = getLastMusicDurationFromSp();
+            Log.i(TAG, "getDuration: " + duration + ",isPrepared:" + isPrepared);
+        } else {
+            duration = mMediaPlayer.getDuration();
+        }
+        Log.i(TAG, "getDuration: " + duration + " ,mMediaPlayer:" + mMediaPlayer + ",mUrl" + mUrl);
+        return duration;
+    }
+
+    private int getLastMusicDurationFromSp() {
+        return (int) Utils.SharedPreferencesUtils.getParam(this, LAST_MUSIC_DURATION, 0);
     }
 
     private int getcurrentPosition() {
         if (mMediaPlayer == null) {
             return -1;
         }
-        return mMediaPlayer.getCurrentPosition();
+        if (!isPrepared) {
+            return getLastMusicPositionFromSp();
+        } else {
+            return mMediaPlayer.getCurrentPosition();
+        }
     }
 
     private void musicProgressMoveTo(int position) {
@@ -352,11 +363,15 @@ public class MusicPlayService extends Service {
     public static final String LAST_MUSIC_DURATION = "LAST_MUSIC_DURATION";
 
     public void saveLastMusicToSp() {
-        Utils.SharedPreferencesUtils.setParam(this, LAST_MUSIC_NAME, mUrl);
-        Utils.SharedPreferencesUtils.setParam(this,
-                LAST_MUSIC_POSITION, mMediaPlayer == null ? 0 : mMediaPlayer.getCurrentPosition());
-        Utils.SharedPreferencesUtils.setParam(this,
-                LAST_MUSIC_DURATION, mMediaPlayer == null ? 0 : mMediaPlayer.getDuration());
+        if (isPrepared && mMediaPlayer != null && mMediaPlayer.getCurrentPosition() != 0) {
+            Utils.SharedPreferencesUtils.setParam(this, LAST_MUSIC_NAME, mUrl);
+            Utils.SharedPreferencesUtils.setParam(this,
+                    LAST_MUSIC_POSITION, mMediaPlayer == null ? 0 : mMediaPlayer.getCurrentPosition());
+            int duration = mMediaPlayer.getDuration();
+            Log.i(TAG, "saveLastMusicToSp: " + duration);
+            Utils.SharedPreferencesUtils.setParam(this,
+                    LAST_MUSIC_DURATION, mMediaPlayer == null ? 0 : duration);
+        }
     }
 
     private String getLastMusicFromSp() {
@@ -370,6 +385,7 @@ public class MusicPlayService extends Service {
     @Override
     public boolean onUnbind(Intent intent) {
         saveLastMusicToSp();
+        mMediaPlayer.release();
         return super.onUnbind(intent);
     }
 }

@@ -32,6 +32,7 @@ import static android.R.attr.path;
  */
 
 public class SecondFragment extends FragmentBase implements View.OnClickListener {
+    public static final String FRAGMENT_TAG = "SecondFragment";
     private Button mSearchButton;
     private TextView mShowTextView;
     private Context mContext;
@@ -43,7 +44,7 @@ public class SecondFragment extends FragmentBase implements View.OnClickListener
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_sec, container, false);
-        mContext = container.getContext();
+        mContext = getActivity();
         initView(view);
         initListener();
         return view;

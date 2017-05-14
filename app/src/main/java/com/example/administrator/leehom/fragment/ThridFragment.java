@@ -27,6 +27,7 @@ import static android.R.attr.duration;
  */
 
 public class ThridFragment extends FragmentBase {
+    public static final String FRAGMENT_TAG = "ThridFragment";
     public static final String TAG = "ThridFragment";
     private View pre_bt;
     private View next_bt;
@@ -46,7 +47,8 @@ public class ThridFragment extends FragmentBase {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         int currentPosition = getArguments().getInt(CURRENT_POSITION);
-        int duration = getArguments().getInt(DURATION);
+        MainActivity mainActivity = (MainActivity) getActivity();
+        int duration = mainActivity.getDuration();
         View view = inflater.inflate(R.layout.fragment_thrid, container, false);
         pre_bt = view.findViewById(R.id.pre_bt);
         next_bt = view.findViewById(R.id.next_bt);
@@ -77,9 +79,8 @@ public class ThridFragment extends FragmentBase {
                     @Override
                     public void onProgressMoveEnd() {
                         // 播放结束
-                        /*
-                        根据播放的格式来部署接下来的动作，包括循环播放，随机播放等等 播放模式写入sp
-                         */
+
+                        // 根据播放的格式来部署接下来的动作，包括循环播放，随机播放等等 播放模式写入sp
                         MainActivity activity = (MainActivity) getActivity();
                         activity.currentMusicPlayOver();
                         setPlayStateByMusicPlayMedia();
@@ -99,10 +100,7 @@ public class ThridFragment extends FragmentBase {
 
     private void initRotateAnimator() {
         mRotateAnimation = ObjectAnimator.
-                ofFloat(musicBg, "rotation", currentRotateValue, currentRotateValue + 360);/*
-
-        mRotateAnimation = ObjectAnimator.
-                ofInt(musicBg, "Rotation", currentRotateValue - 360, currentRotateValue);*/
+                ofFloat(musicBg, "rotation", currentRotateValue, currentRotateValue + 360);
         LinearInterpolator lin = new LinearInterpolator();//设置动画匀速运动
         mRotateAnimation.setDuration(20000);
         mRotateAnimation.setRepeatCount(Animation.INFINITE);
@@ -150,10 +148,9 @@ public class ThridFragment extends FragmentBase {
         Log.i(TAG, "www onCreate currentPosition: " + currentPosition);
     }
 
-    public static ThridFragment getInstance(int currentPostion, int duration) {
+    public static ThridFragment getInstance(int currentPostion) {
         Bundle bundle = new Bundle();
         bundle.putInt(CURRENT_POSITION, currentPostion);
-        bundle.putInt(DURATION, duration);
         ThridFragment thridFragment = new ThridFragment();
         thridFragment.setArguments(bundle);
         return thridFragment;
@@ -170,6 +167,7 @@ public class ThridFragment extends FragmentBase {
             Log.i(TAG, "onHiddenChanged");
             MainActivity activity = (MainActivity) getActivity();
             int currentPostion = activity.getcurrentPosition();
+            // TODO 这里获取的总时间应该是当前播放音乐的时间
             int duration = activity.getDuration();
             Log.i(TAG, "onHiddenChanged  currentPostion:" + currentPostion + " ,duration :" + duration);
             if (currentPostion != -1 && duration != -1) {
@@ -197,7 +195,6 @@ public class ThridFragment extends FragmentBase {
             case AppContant.PlayMessage.STOP:
                 // TODO 目前的场景只是再次进入的时候是停止状态，点击播放键，播放上次存储的音乐
                 play_or_pause.setText("播放");
-                play_progress.reset();
                 mRotateAnimation.removeAllListeners();
                 mRotateAnimation.cancel();
                 break;

@@ -44,6 +44,7 @@ import static com.example.administrator.leehom.model.AppContant.StringFlag.PLAY_
  */
 
 public class MainFragment extends FragmentBase {
+    public static final String FRAGMENT_TAG = "MainFragment";
     private final static String TAG = "MainFragment";
     private RecyclerView mRecyclerView;
     private MainActivity mActivity;
@@ -160,6 +161,16 @@ public class MainFragment extends FragmentBase {
         Log.i(TAG, "refreshListUI modelList :" + modelList);
         if (!Utils.checkNull(mFragmentAdapter)) {
             mFragmentAdapter.updataRefresh(modelList);
+        }
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        if(hidden){
+
+        } else {
+            updateRecyclerView();
         }
     }
 }

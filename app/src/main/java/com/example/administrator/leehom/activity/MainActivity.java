@@ -11,6 +11,7 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -97,91 +98,29 @@ public class MainActivity extends Activity implements View.OnClickListener {
      */
     private Fragment mCurrentShowingFragment;
 
-    /**
-     * 防止Fragment的生命周期重新走一遍
-     * TODO 可能存在按下home进程进入后台再进入 内存中的fragment对象被清空 会有异常bug
-     *
-     * @param clazz
-     * @param isNewStart
-     */
-    private void setFragment(Class clazz, boolean isNewStart) {
-        Fragment fragment = createFragment(clazz, isNewStart);
-        if (Utils.checkNull(fragment)) {
-            return;
-        }
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        String simpleName = clazz.getSimpleName();
-        Fragment fragmentByTag = fragmentManager.findFragmentByTag(simpleName);
-        if (!Utils.checkNull(mCurrentShowingFragment)) {
-            fragmentTransaction.hide(mCurrentShowingFragment);
-        }
-        if (Utils.checkNull(fragmentByTag)) {
-            fragmentTransaction.add(R.id.fragment_container, fragment, simpleName);
-            mCurrentShowingFragment = fragment;
-            fragmentTransaction.show(fragment);
-        } else {
-            fragmentTransaction.show(fragmentByTag);
-            mCurrentShowingFragment = fragmentByTag;
-        }
-        fragmentTransaction.commit();
-    }
-
-    private void setDefaultFragment() {
-        setFragment(MainFragment.class, true);
-    }
-
     private Map<String, Fragment> mAllFragments = new HashMap<>();
-
-    /**
-     * 创建Fragment
-     *
-     * @param fragment
-     * @param isNewStart 是否是重新new的Fragment对象
-     */
-    private Fragment createFragment(Class fragment, boolean isNewStart) {
-        // 重新开启fragment
-        if (isNewStart) {
-            if (fragment == MainFragment.class) {
-                return MainFragment.getInstance();
-            } else if (fragment == SecondFragment.class) {
-                return SecondFragment.getInstance();
-
-            } else if (fragment == ThridFragment.class) {
-                return ThridFragment.getInstance(getLastMusicPositionFromSp(), mMusicBinder.getDuration());
-            }
-        }
-        // 沿用老的fragment
-        String key = fragment.getSimpleName();
-        if (mAllFragments.containsKey(key)) {
-            return mAllFragments.get(key);
-        } else {
-            if (fragment == MainFragment.class) {
-                return MainFragment.getInstance();
-            } else if (fragment == SecondFragment.class) {
-                return SecondFragment.getInstance();
-
-            } else if (fragment == ThridFragment.class) {
-                return ThridFragment.getInstance(getLastMusicPositionFromSp(), mMusicBinder.getDuration());
-            }
-        }
-        return null;
-    }
 
     @Override
     public void onClick(View v) {
+        if (!Utils.checkNull(mCurrentClickView)) {
+            mCurrentClickView.setEnabled(true);
+        }
         switch (v.getId()) {
             case R.id.first:
-                setFragment(MainFragment.class, false);
+                gotoFragment(MainFragment.FRAGMENT_TAG);
                 break;
             case R.id.second:
-                setFragment(ThridFragment.class, false);
+                gotoFragment(ThridFragment.FRAGMENT_TAG);
                 break;
             case R.id.third:
-                setFragment(SecondFragment.class, false);
+                gotoFragment(SecondFragment.FRAGMENT_TAG);
                 break;
         }
+        v.setEnabled(false);
+        mCurrentClickView = v;
     }
+
+    private View mCurrentClickView;
 
     public IService getMusicBinder() {
         return mMusicBinder;
@@ -261,5 +200,55 @@ public class MainActivity extends Activity implements View.OnClickListener {
             Log.e(TAG, "mMusicBinder is null");
         }
         mMusicBinder.currentMusicPlayOver();
+    }
+
+
+    /**
+     * 1、当前展示的fragment与新加入的Fragment相同
+     * 2、....不同
+     * 3、当前fragment之前已经创建过 add and show and hide
+     * 4、fragment没有创建过 show hide
+     *
+     * @param tag
+     */
+    public void gotoFragment(String tag) {
+        Fragment fragment = null;
+        FragmentManager fragmentManager = getFragmentManager();
+        fragment = fragmentManager.findFragmentByTag(tag);
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        if (fragment == null) {
+            // fragment第一次创建
+            if (TextUtils.equals(tag, MainFragment.FRAGMENT_TAG)) {
+                fragment = MainFragment.getInstance();
+            } else if (TextUtils.equals(tag, SecondFragment.FRAGMENT_TAG)) {
+                fragment = SecondFragment.getInstance();
+            } else if (TextUtils.equals(tag, ThridFragment.FRAGMENT_TAG)) {
+                fragment = ThridFragment.getInstance(getLastMusicPositionFromSp());
+            }
+            if (fragment == mCurrentShowingFragment) {
+                return;
+            } else {
+                if (fragment != null) {
+                    if (mCurrentShowingFragment != null) {
+                        fragmentTransaction.hide(mCurrentShowingFragment);
+                    }
+                    fragmentTransaction.add(R.id.fragment_container, fragment, tag);
+                    fragmentTransaction.show(fragment);
+                    mCurrentShowingFragment = fragment;
+                }
+            }
+        } else {
+            // 非第一创建
+            if (fragment == mCurrentShowingFragment) {
+                return;
+            } else {
+                if (mCurrentShowingFragment != null) {
+                    fragmentTransaction.hide(mCurrentShowingFragment);
+                    fragmentTransaction.show(fragment);
+                    mCurrentShowingFragment = fragment;
+                }
+            }
+        }
+        fragmentTransaction.commit();
     }
 }
