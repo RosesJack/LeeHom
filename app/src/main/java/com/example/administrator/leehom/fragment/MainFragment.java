@@ -5,6 +5,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -40,7 +41,7 @@ import static com.example.administrator.leehom.model.AppContant.StringFlag.PLAY_
 /**
  * auther：wzy
  * date：2017/4/30 01 :05
- * desc:
+ * desc:music list fragment
  */
 
 public class MainFragment extends FragmentBase {
@@ -92,8 +93,38 @@ public class MainFragment extends FragmentBase {
         mRecyclerView.setLayoutManager(layout);
         mFragmentAdapter = new MainFragmentAdapter(mData);
         mRecyclerView.setAdapter(mFragmentAdapter);
+        mRecyclerView.addItemDecoration(new SpaceItemDecoration(mFragmentAdapter, getActivity()));
         updateRecyclerView();
     }
+
+    private static class SpaceItemDecoration  extends RecyclerView.ItemDecoration{
+        private RecyclerView.Adapter mAdapter;
+        private Context mContext;
+        private SpaceItemDecoration(RecyclerView.Adapter adapter, Context context) {
+            mAdapter = adapter;
+            mContext = context;
+        }
+
+        @Override
+        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+            if (mAdapter == null || mContext == null) {
+                Log.e(TAG, "mAdapter==null or mContext == null");
+                return;
+            }
+            int itemCount = mAdapter.getItemCount();
+            int pos = parent.getChildAdapterPosition(view);
+            Log.d(TAG, "itemCount>>" +itemCount + ";Position>>" + pos);
+            outRect.left = mContext.getResources().getDimensionPixelSize(R.dimen.ui_10_dp);
+            outRect.right = outRect.left;
+            if (pos == 0) {
+                outRect.top = mContext.getResources().getDimensionPixelSize(R.dimen.ui_4_dp);
+            } else {
+                outRect.top = 0;
+            }
+            outRect.bottom = mContext.getResources().getDimensionPixelSize(R.dimen.ui_4_dp);
+        }
+    }
+
 
     private void updateRecyclerView() {
         ThreadPoolProxyFactory.getNormalThreadPoolProxy().execute(queryDbRunable);

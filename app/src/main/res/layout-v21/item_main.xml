@@ -5,7 +5,9 @@
               android:clickable="true"
               android:background="@drawable/main_item_selector"
               android:orientation="vertical">
+    <!--android:background="?android:attr/selectableItemBackground"-->
 
+              <!--android:background="@drawable/cicler_layout_bg"-->
     <TextView
         android:textColor="@color/colorBlack"
         android:paddingTop="5dp"
@@ -17,11 +19,10 @@
         android:gravity="center_vertical"
         android:paddingLeft="20dp"
         android:text="心中的日月"
-        android:textSize="20sp"/>
+        android:textSize="16sp"/>
 
     <TextView
         android:textColor="@color/colorGrey"
-        android:paddingTop="5dp"
         android:paddingBottom="5dp"
         android:id="@+id/music_owner"
         android:layout_width="match_parent"
@@ -30,5 +31,5 @@
         android:gravity="center_vertical"
         android:paddingLeft="20dp"
         android:text="王力宏"
-        android:textSize="20sp"/>
+        android:textSize="14sp"/>
 </LinearLayout>

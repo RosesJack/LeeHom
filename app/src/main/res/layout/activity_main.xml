@@ -16,50 +16,46 @@
 
     </FrameLayout>
 
-    <LinearLayout
+    <RelativeLayout
+        android:background="@color/colorPrimary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
         <TextView
-            android:background="@drawable/bottom_item_selector"
             android:id="@+id/first"
-            android:layout_width="0dp"
+            android:padding="15dp"
+            android:layout_alignParentLeft="true"
+            android:background="@drawable/bottom_item_selector"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:gravity="center"
             android:paddingBottom="20dp"
             android:paddingTop="20dp"
             android:text="音乐列表"/>
-        <View
-            android:background="@color/colorBlack"
-            android:layout_width="1dp"
-            android:layout_height="match_parent"/>
 
         <TextView
+            android:padding="15dp"
+            android:layout_centerHorizontal="true"
             android:background="@drawable/bottom_item_selector"
             android:id="@+id/second"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:gravity="center"
             android:paddingBottom="20dp"
             android:paddingTop="20dp"
             android:text="播放中心"/>
 
-        <View
-            android:background="@color/colorBlack"
-            android:layout_width="1dp"
-            android:layout_height="match_parent"/>
         <TextView
+            android:padding="15dp"
+            android:layout_alignParentRight="true"
             android:background="@drawable/bottom_item_selector"
             android:id="@+id/third"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:gravity="center"
             android:paddingBottom="20dp"
             android:paddingTop="20dp"
             android:text="本地搜索"/>
-    </LinearLayout>
+    </RelativeLayout>
 </LinearLayout>
