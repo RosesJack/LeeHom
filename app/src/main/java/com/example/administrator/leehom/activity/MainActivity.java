@@ -223,7 +223,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
             } else if (TextUtils.equals(tag, SecondFragment.FRAGMENT_TAG)) {
                 fragment = SecondFragment.getInstance();
             } else if (TextUtils.equals(tag, ThridFragment.FRAGMENT_TAG)) {
-                fragment = ThridFragment.getInstance(getLastMusicPositionFromSp());
+                fragment = ThridFragment.getInstance();
             }
             if (fragment == mCurrentShowingFragment) {
                 return;

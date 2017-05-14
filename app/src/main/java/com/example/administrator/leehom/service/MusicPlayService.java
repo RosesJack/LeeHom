@@ -173,6 +173,7 @@ public class MusicPlayService extends Service {
             Log.e(TAG, "continuePlay :  mMediaPlayer == null");
             return;
         }
+        mMediaPlayer.seekTo(mCurrentPosition);
         mMediaPlayer.start();
         mCurrentPlayStaus = AppContant.PlayMessage.PLAY;
     }
@@ -354,6 +355,7 @@ public class MusicPlayService extends Service {
 
     private void musicProgressMoveTo(int position) {
         if (mMediaPlayer != null) {
+            mCurrentPosition = position;
             mMediaPlayer.seekTo(position);
         }
     }

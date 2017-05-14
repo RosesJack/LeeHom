@@ -46,9 +46,9 @@ public class ThridFragment extends FragmentBase {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        int currentPosition = getArguments().getInt(CURRENT_POSITION);
         MainActivity mainActivity = (MainActivity) getActivity();
         int duration = mainActivity.getDuration();
+        int currentPosition = mainActivity.getcurrentPosition();
         View view = inflater.inflate(R.layout.fragment_thrid, container, false);
         pre_bt = view.findViewById(R.id.pre_bt);
         next_bt = view.findViewById(R.id.next_bt);
@@ -148,9 +148,8 @@ public class ThridFragment extends FragmentBase {
         Log.i(TAG, "www onCreate currentPosition: " + currentPosition);
     }
 
-    public static ThridFragment getInstance(int currentPostion) {
+    public static ThridFragment getInstance() {
         Bundle bundle = new Bundle();
-        bundle.putInt(CURRENT_POSITION, currentPostion);
         ThridFragment thridFragment = new ThridFragment();
         thridFragment.setArguments(bundle);
         return thridFragment;
