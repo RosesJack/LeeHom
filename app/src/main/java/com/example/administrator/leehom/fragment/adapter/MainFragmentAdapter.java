@@ -48,8 +48,13 @@ public class MainFragmentAdapter extends BaseAdapter<MusicModel> {
         itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!Utils.checkNull(mItemClickListener) && !isLongClickSoDonotClick) {
-                    mItemClickListener.onItemClick(v);
+                Log.i(TAG, "setonclick");
+                if (!Utils.checkNull(mItemClickListener)) {
+                    if (!isLongClickSoDonotClick) {
+                        mItemClickListener.onItemClick(v);
+                    } else {
+                        isLongClickSoDonotClick = false;
+                    }
                 }
             }
         });
@@ -83,9 +88,6 @@ public class MainFragmentAdapter extends BaseAdapter<MusicModel> {
                             mRecyclerViewItemLongClickListener.afterTouch(v);
                         }
                         mTimeHandler.removeMessages(TimeHandler.TIME_EMPTY);
-                        if (isLongClickSoDonotClick) {
-                            isLongClickSoDonotClick = false;
-                        }
                         mCurrentClickView = null;
                         break;
                 }
@@ -138,6 +140,7 @@ private View mCurrentClickView;
                         Log.i(TAG, " set mRecyclerViewItemLongClickListener");
                         mRecyclerViewItemLongClickListener.onTouching(mCurrentClickView);
                         isLongClickSoDonotClick = true;
+                        Log.i(TAG, "setontouch sendmessage");
                     }
                     break;
             }
