@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">LeeHom</string>
+    <string name="music_from">专辑:%1$s</string>
+    <string name="music_duration">音乐时长:%1$d</string>
 </resources>

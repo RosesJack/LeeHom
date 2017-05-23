@@ -1,49 +1,51 @@
 package com.example.administrator.leehom.fragment;
 
-import android.app.Activity;
-import android.content.ComponentName;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
+import android.graphics.Bitmap;
+import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
+import android.os.SystemClock;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
+import android.view.WindowManager;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.example.administrator.leehom.R;
 import com.example.administrator.leehom.activity.MainActivity;
 import com.example.administrator.leehom.db.dao.MusicDao;
 import com.example.administrator.leehom.fragment.adapter.MainFragmentAdapter;
 import com.example.administrator.leehom.fragment.adapter.RecyclerViewItemClickListener;
-import com.example.administrator.leehom.model.AppContant;
+import com.example.administrator.leehom.fragment.adapter.RecyclerViewItemLongClickListener;
 import com.example.administrator.leehom.model.MusicModel;
 import com.example.administrator.leehom.service.IService;
-import com.example.administrator.leehom.service.MusicPlayService;
 import com.example.administrator.leehom.thread.ThreadPoolProxyFactory;
 import com.example.administrator.leehom.utils.Utils;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
 
-import static android.content.Context.BIND_AUTO_CREATE;
-import static android.os.Build.VERSION_CODES.M;
-import static com.example.administrator.leehom.model.AppContant.StringFlag.PLAY_URL;
-
 /**
  * auther：wzy
  * date：2017/4/30 01 :05
  * desc:music list fragment
  */
-
+@RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
 public class MainFragment extends FragmentBase {
     public static final String FRAGMENT_TAG = "MainFragment";
     private final static String TAG = "MainFragment";
@@ -52,6 +54,9 @@ public class MainFragment extends FragmentBase {
     private List<MusicModel> mData;
     private MainFragmentAdapter mFragmentAdapter;
     private IService mMusicBinder;
+    private WindowManager mWmManager;
+    private RelativeLayout mRelativeLayout;
+    private long mFirstTouchTime;
 
     @Nullable
     @Override
@@ -82,6 +87,135 @@ public class MainFragment extends FragmentBase {
                 }
             }
         });
+
+        // 长按事件
+        mFragmentAdapter.setRecyclerViewItemLongClickListener(new RecyclerViewItemLongClickListener() {
+            @Override
+            public void onLongClick(View v) {
+                Log.i(TAG, "onItemClick: ");
+                // doLongClickEvent(v);
+            }
+
+            @Override
+            public void onTouching(View v) {
+                Log.i(TAG, "onTouching");
+                doLongClickEvent(v);
+            }
+
+            @Override
+            public void afterTouch(View v) {
+                if (mRelativeLayout != null) {
+                    if (mWmManager == null) {
+                        mWmManager = (WindowManager) mActivity.getSystemService(Context.WINDOW_SERVICE);
+                    }
+                    mWmManager.removeView(mRelativeLayout);
+                }
+            }
+        });
+    }
+
+    private void doLongClickEvent(View view) {
+        if (view == null) {
+            Log.w(TAG, "view is null");
+            return;
+        }
+        Object obj = view.getTag();
+        MusicModel musicModel = (MusicModel) obj;
+        Log.i(TAG, "musicModel :" + musicModel);
+        if (mActivity == null) {
+            Log.e(TAG, "mActivity==null");
+            return;
+        }
+        // 模糊展开
+        blurOpenDetail(view, musicModel);
+    }
+
+    private void blurOpenDetail(View view, MusicModel musicModel) {
+        int[] intXy = new int[2];
+        view.getLocationOnScreen(intXy);
+        int originWidth = view.getMeasuredWidth();
+        Log.i(TAG, "getMeasuredWidth1: " + originWidth);
+        ViewGroup.LayoutParams originWidthLayoutParams = view.getLayoutParams();
+        originWidth = originWidthLayoutParams.width;
+
+        RelativeLayout.LayoutParams viewLayoutLayoutParams =
+                new RelativeLayout.LayoutParams(originWidth, ViewGroup.LayoutParams.WRAP_CONTENT);
+        viewLayoutLayoutParams.leftMargin = intXy[0];
+        viewLayoutLayoutParams.topMargin = intXy[1];
+        final ViewGroup viewLayout = (ViewGroup) mActivity.getLayoutInflater().inflate(R.layout.item_main, null);
+        LinearLayout.LayoutParams imageLayoutParameter =
+                new LinearLayout.LayoutParams
+                        (ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        int measuredHeight1 = viewLayout.getMeasuredHeight();
+        TextView tv_name = (TextView) viewLayout.findViewById(R.id.music_name);
+        TextView tv_owner = (TextView) viewLayout.findViewById(R.id.music_owner);
+        tv_name.setText(musicModel.getTilte());
+        tv_owner.setText(musicModel.getArtist());
+
+        TextView tv1 = new TextView(view.getContext());
+        tv1.setLayoutParams(imageLayoutParameter);
+        tv1.setText(mActivity.getResources().getString(R.string.music_from, musicModel.getAlbum()));
+        TextView tv2 = new TextView(view.getContext());
+        tv2.setLayoutParams(imageLayoutParameter);
+        tv2.setText(mActivity.getResources().getString(R.string.music_duration, musicModel.getDuration()));
+        tv1.setTextColor(R.color.colorBlack);
+        tv2.setTextColor(R.color.colorBlack);
+
+        View rootView = view.getRootView();
+        rootView.setDrawingCacheEnabled(true);
+        rootView.buildDrawingCache();
+        Bitmap bitmap = rootView.getDrawingCache();
+        Bitmap blurBitmap = Utils.blurBitmap(bitmap);
+        mRelativeLayout = new RelativeLayout(mActivity);
+        Drawable drawable = new BitmapDrawable(blurBitmap);
+        mRelativeLayout.addView(viewLayout, viewLayoutLayoutParams);
+
+        viewLayout.addView(tv1);
+        viewLayout.addView(tv2);
+        viewLayout.measure(0, 0);
+        int measuredHeight2 = viewLayout.getMeasuredHeight();
+
+        Log.i(TAG, "measuredHeight2 :" + measuredHeight2);
+        ValueAnimator valueAnimator = ValueAnimator.ofFloat(view.getMeasuredHeight(), measuredHeight2).setDuration(500);
+        valueAnimator.start();
+
+        valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                ViewGroup.LayoutParams layoutParams = viewLayout.getLayoutParams();
+                float height = (float) animation.getAnimatedValue();
+                layoutParams.height = (int) height;
+                viewLayout.setLayoutParams(layoutParams);
+            }
+        });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        mRelativeLayout.setBackground(drawable);
+        ObjectAnimator.ofFloat(mRelativeLayout, "alpha", 0.1f, 1f).setDuration(500).start();
+        mWmManager = (WindowManager) mActivity.getSystemService(Context.WINDOW_SERVICE);
+        WindowManager.LayoutParams layoutParams =
+                new WindowManager.LayoutParams
+                        (ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT,
+                                WindowManager.LayoutParams.TYPE_APPLICATION,
+                                // 设置为无焦点状态
+                                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                                        | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, // 没有边界
+                                // 半透明效果
+                                PixelFormat.TRANSLUCENT);
+        mWmManager.addView(mRelativeLayout, layoutParams);
     }
 
     private void initData() {
@@ -204,4 +338,5 @@ public class MainFragment extends FragmentBase {
             updateRecyclerView();
         }
     }
+
 }

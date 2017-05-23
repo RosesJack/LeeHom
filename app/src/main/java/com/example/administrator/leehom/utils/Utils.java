@@ -2,7 +2,17 @@ package com.example.administrator.leehom.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.Matrix;
+import android.os.Build;
+import android.renderscript.Allocation;
+import android.renderscript.Element;
+import android.renderscript.RenderScript;
+import android.renderscript.ScriptIntrinsicBlur;
+import android.support.annotation.RequiresApi;
 import android.text.TextUtils;
+
+import com.example.administrator.leehom.App;
 
 import java.io.File;
 import java.util.List;
@@ -122,5 +132,58 @@ public class Utils {
 
             return null;
         }
+    }
+
+
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
+    public static Bitmap blurBitmap(Bitmap bitmap) {
+        //先将图片缩小
+        bitmap = fitBitmap(bitmap, bitmap.getWidth() / 3);
+        //Let's create an empty bitmap with the same size of the bitmap we want to blur
+        Bitmap outBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        //Instantiate a new Renderscript
+        RenderScript rs = RenderScript.create(App.getContext());
+
+        //Create an Intrinsic Blur Script using the Renderscript
+        ScriptIntrinsicBlur blurScript = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
+
+        //Create the Allocations (in/out) with the Renderscript and the in/out bitmaps
+        Allocation allIn = Allocation.createFromBitmap(rs, bitmap);
+        Allocation allOut = Allocation.createFromBitmap(rs, outBitmap);
+
+        //Set the radius of the blur: 0 < radius <= 25
+        blurScript.setRadius(25.0f);
+
+        //Perform the Renderscript
+        blurScript.setInput(allIn);
+        blurScript.forEach(allOut);
+
+        //Copy the final bitmap created by the out Allocation to the outBitmap
+        allOut.copyTo(outBitmap);
+
+        //recycle the original bitmap
+
+        //After finishing everything, we destroy the Renderscript.
+        rs.destroy();
+        //将图片放大
+        return fitBitmap(outBitmap, bitmap.getWidth() * 3);
+    }
+
+    /**
+     * 尺寸压缩，在内存中的大小变化
+     *
+     * @param target
+     * @param newWidth
+     * @return
+     */
+    public static Bitmap fitBitmap(Bitmap target, int newWidth) {
+        int width = target.getWidth();
+        int height = target.getHeight();
+        Matrix matrix = new Matrix();
+        float scaleWidth = ((float) newWidth) / width;
+        matrix.postScale(scaleWidth, scaleWidth);
+        Bitmap bmp = Bitmap.createBitmap(target, 0, 0, width, height, matrix,
+                true);
+        return bmp;
     }
 }
