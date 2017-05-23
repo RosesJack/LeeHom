@@ -108,6 +108,7 @@ public class MainFragment extends FragmentBase {
                     if (mWmManager == null) {
                         mWmManager = (WindowManager) mActivity.getSystemService(Context.WINDOW_SERVICE);
                     }
+                    mRelativeLayout.clearAnimation();
                     mWmManager.removeView(mRelativeLayout);
                 }
             }
@@ -167,6 +168,7 @@ public class MainFragment extends FragmentBase {
         Bitmap bitmap = rootView.getDrawingCache();
         Bitmap blurBitmap = Utils.blurBitmap(bitmap);
         mRelativeLayout = new RelativeLayout(mActivity);
+        mRelativeLayout.setBackground(null);
         Drawable drawable = new BitmapDrawable(blurBitmap);
         mRelativeLayout.addView(viewLayout, viewLayoutLayoutParams);
 
@@ -216,6 +218,8 @@ public class MainFragment extends FragmentBase {
                                 // 半透明效果
                                 PixelFormat.TRANSLUCENT);
         mWmManager.addView(mRelativeLayout, layoutParams);
+        // 不设置以下属性，每次得到的bitmap都与第一次得到的相同
+        rootView.setDrawingCacheEnabled(false);
     }
 
     private void initData() {
