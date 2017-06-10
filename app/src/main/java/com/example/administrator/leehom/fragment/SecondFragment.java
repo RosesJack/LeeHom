@@ -16,7 +16,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.example.administrator.leehom.LoadingView;
 import com.example.administrator.leehom.R;
+import com.example.administrator.leehom.activity.BaseActivity;
 import com.example.administrator.leehom.engine.LocalMusicSearcher;
 import com.example.administrator.leehom.engine.SearchListener;
 import com.example.administrator.leehom.utils.Utils;
@@ -39,15 +41,21 @@ public class SecondFragment extends FragmentBase implements View.OnClickListener
     public static final String TAG = "SecondFragment";
     private LocalMusicSearcher mLocalMusicSearcher;
     private final SearcherHandler searcherHandler = new SearcherHandler(this, Looper.getMainLooper());
+    private View mView;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_sec, container, false);
+        mView = inflater.inflate(R.layout.fragment_sec, container, false);
         mContext = getActivity();
-        initView(view);
+        initView(mView);
         initListener();
-        return view;
+        initData();
+        return mView;
+    }
+
+    private void initData() {
+
     }
 
     private void initListener() {
@@ -133,13 +141,25 @@ public class SecondFragment extends FragmentBase implements View.OnClickListener
 
         @Override
         public void handleMessage(Message msg) {
+            SecondFragment secondFragment = mSecondFragmentR.get();
+            if (secondFragment == null) {
+                Log.w(TAG, "secondFragment is null");
+                return;
+            }
             switch (msg.what) {
                 case MUSIC_SEARCHING:
+                    LoadingView
+                            .build((BaseActivity<LoadingView>) secondFragment.getActivity())
+                            .setContainer((ViewGroup) secondFragment.mView)
+                            .showLoading();
                     String url = (String) msg.obj;
-                    mSecondFragmentR.get().showSearching(url);
+                    secondFragment.showSearching(url);
                     break;
                 case MUSIC_SEARCHING_STOP:
-                    mSecondFragmentR.get().searchOver();
+                    LoadingView
+                            .build((BaseActivity<LoadingView>) secondFragment.getActivity())
+                            .hideLoading();
+                    secondFragment.searchOver();
                     break;
             }
         }

@@ -2,6 +2,7 @@ package com.example.administrator.leehom.fragment;
 
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
@@ -26,7 +27,9 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.example.administrator.leehom.LoadingView;
 import com.example.administrator.leehom.R;
+import com.example.administrator.leehom.activity.BaseActivity;
 import com.example.administrator.leehom.activity.MainActivity;
 import com.example.administrator.leehom.db.dao.MusicDao;
 import com.example.administrator.leehom.fragment.adapter.MainFragmentAdapter;
@@ -57,16 +60,20 @@ public class MainFragment extends FragmentBase {
     private WindowManager mWmManager;
     private RelativeLayout mRelativeLayout;
     private long mFirstTouchTime;
+    private View mView;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         Log.i(TAG, "onCreateView");
-        View view = inflater.inflate(R.layout.fragment_main, container, false);
-        mRecyclerView = (RecyclerView) view.findViewById(R.id.music_list);
+        mView = inflater.inflate(R.layout.fragment_main, container, false);
+        LoadingView.build((BaseActivity<LoadingView>) this.getActivity())
+                .setContainer(container)
+                .showLoading();
+        mRecyclerView = (RecyclerView) mView.findViewById(R.id.music_list);
         initData();
         initListener();
-        return view;
+        return mView;
     }
 
     private void initListener() {
@@ -191,20 +198,6 @@ public class MainFragment extends FragmentBase {
             }
         });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         mRelativeLayout.setBackground(drawable);
         ObjectAnimator.ofFloat(mRelativeLayout, "alpha", 0.1f, 1f).setDuration(500).start();
         mWmManager = (WindowManager) mActivity.getSystemService(Context.WINDOW_SERVICE);
@@ -272,6 +265,7 @@ public class MainFragment extends FragmentBase {
     private Runnable queryDbRunable = new Runnable() {
         @Override
         public void run() {
+            SystemClock.sleep(3000);
             List<MusicModel> models = MusicDao.getInstance(mActivity).queryAll();
             Log.i(TAG, "query all :" + models);
             if (!Utils.checkNull(mDbHandler)) {
@@ -319,7 +313,14 @@ public class MainFragment extends FragmentBase {
                 case QUERY_ALL:
                     if (!Utils.checkNull(mMainFragmentWf)) {
                         List<MusicModel> musicList = (List<MusicModel>) msg.obj;
-                        mMainFragmentWf.get().refreshListUI(musicList);
+                        MainFragment mainFragment = mMainFragmentWf.get();
+                        if (mainFragment == null) {
+                            Log.w(TAG,"mainFragment is null");
+                            return;
+                        }
+                        Activity activity = mainFragment.getActivity();
+                        LoadingView.build((BaseActivity<LoadingView>) activity).hideLoading();
+                        mainFragment.refreshListUI(musicList);
                     }
                     break;
             }

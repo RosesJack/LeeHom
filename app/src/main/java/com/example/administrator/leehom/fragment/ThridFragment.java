@@ -12,10 +12,14 @@ import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.widget.TextView;
 
+import com.example.administrator.leehom.LoadingView;
 import com.example.administrator.leehom.R;
+import com.example.administrator.leehom.activity.BaseActivity;
 import com.example.administrator.leehom.activity.MainActivity;
 import com.example.administrator.leehom.model.AppContant;
 import com.example.administrator.leehom.utils.MusicSeekBar;
+
+import java.util.TimerTask;
 
 import static android.R.attr.duration;
 

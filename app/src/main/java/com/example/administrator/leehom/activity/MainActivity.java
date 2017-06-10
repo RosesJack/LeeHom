@@ -17,6 +17,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 
+import com.example.administrator.leehom.LoadingView;
 import com.example.administrator.leehom.R;
 import com.example.administrator.leehom.fragment.MainFragment;
 import com.example.administrator.leehom.fragment.SecondFragment;
@@ -35,7 +36,7 @@ import static com.example.administrator.leehom.service.MusicPlayService.LAST_MUS
 /**
  * TODO 在该页面后，点击该页面所属按钮不应再有动作
  */
-public class MainActivity extends Activity implements View.OnClickListener {
+public class MainActivity extends BaseActivity<LoadingView> implements View.OnClickListener {
 
     private TextView mFirst;
     private TextView mSecond;
