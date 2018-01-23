@@ -19,7 +19,16 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <service android:name=".service.MusicPlayService"/>
+        <service android:name=".service.MusicPlayService" />
+        <activity
+            android:theme="@android:style/Theme.Translucent"
+            android:name=".widget.PermissionActivity"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.check_permission" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

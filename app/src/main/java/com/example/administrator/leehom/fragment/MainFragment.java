@@ -2,6 +2,7 @@ package com.example.administrator.leehom.fragment;
 
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -22,6 +23,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -109,6 +111,7 @@ public class MainFragment extends FragmentBase {
                 doLongClickEvent(v);
             }
 
+            @TargetApi(Build.VERSION_CODES.KITKAT)
             @Override
             public void afterTouch(View v) {
                 if (mRelativeLayout != null) {
@@ -116,7 +119,9 @@ public class MainFragment extends FragmentBase {
                         mWmManager = (WindowManager) mActivity.getSystemService(Context.WINDOW_SERVICE);
                     }
                     mRelativeLayout.clearAnimation();
-                    mWmManager.removeView(mRelativeLayout);
+                    if (mRelativeLayout.isAttachedToWindow()) {
+                        mWmManager.removeView(mRelativeLayout);
+                    }
                 }
             }
         });

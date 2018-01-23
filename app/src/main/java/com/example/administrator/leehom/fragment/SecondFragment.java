@@ -8,6 +8,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
+import android.support.v4.content.PermissionChecker;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -21,12 +22,13 @@ import com.example.administrator.leehom.R;
 import com.example.administrator.leehom.activity.BaseActivity;
 import com.example.administrator.leehom.engine.LocalMusicSearcher;
 import com.example.administrator.leehom.engine.SearchListener;
+import com.example.administrator.leehom.model.AppContant;
 import com.example.administrator.leehom.utils.Utils;
 
 import java.lang.ref.WeakReference;
 
 import static android.R.attr.path;
-
+import com.example.administrator.leehom.widget.PemissionCheck;
 /**
  * auther：wzy
  * date：2017/4/30 01 :05
@@ -80,6 +82,9 @@ public class SecondFragment extends FragmentBase implements View.OnClickListener
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.search_button:
+                if (!PemissionCheck.checkPermission(this.getActivity(), AppContant.PermissionStr.PERMISSION_READ_EXTERNAL_STORAGE)) {
+                    return;
+                }
                 doLocalSearch();
                 v.setClickable(false);
                 break;

@@ -41,5 +41,15 @@ public class AppContant {
          * 用于intent的StringExtra
          */
         public static final String PLAY_URL = "url";
+        /**
+         * 用于intent的StringExtra（权限）
+         */
+        public static final String PERMISSION_FLAG = "permission_strings";
+
+        public static final String PERMISSION_ACTION = "android.intent.action.check_permission";
+    }
+
+    public static class PermissionStr{
+        public static final String PERMISSION_READ_EXTERNAL_STORAGE = "android.permission.READ_EXTERNAL_STORAGE";
     }
 }
